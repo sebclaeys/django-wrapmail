@@ -1,0 +1,4 @@
+mailator
+========
+
+Email manager
