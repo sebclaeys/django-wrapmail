@@ -1,0 +1,33 @@
+<div class="well">
+    <table class="table table-hover">
+        <tbody>
+            <tr>
+                <th>Created:</th>
+                <td>{{ task.datetime }}</td>
+            </tr>
+            <tr>
+                <th>Status:</th>
+                <td>{% if task.processing %} Running <i class="fa fa-spinner fa-spin"></i> {% else %} Stoped {% endif %}</td>
+            </tr>
+            <tr>
+                <th>Completed:</th>
+                <td>{% if task.completed %} True {% else %} False {% endif %}</td>
+            </tr>
+            <tr>
+                <th>Errors:</th>
+                <td>{% if task.errors %} True {% else %} False {% endif %}</td>
+            </tr>
+            <tr>
+                <th>Emails:</th>
+                <td>{{ task.nb_processed }} / {{ task.liste.nb_emails }}</td>
+            </tr>
+            <tr>
+                <th>Percent:</th>
+                <td>{{ task.percent }}%</td>
+            </tr>
+        </tbody>
+    </table>
+    <div class="clearfix">
+        <a class="pull-right" href="{% url 'admin:mailator_task_change' task.id %}">Advanced edit</a>
+    </div>
+</div>

@@ -1,0 +1,17 @@
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <strong>Object: </strong> {{ subject|safe }}
+    </div>
+    <div class="panel-body">
+        <div id="emailPreview">
+            <div class="row">
+                <div class="col-xs-6">
+                    {{ html_content|safe }}
+                </div>
+                <div class="col-xs-6">
+                    {{ text_content|safe }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

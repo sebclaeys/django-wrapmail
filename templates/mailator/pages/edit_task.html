@@ -1,0 +1,64 @@
+{% extends "mailator/layouts/layout.html" %}
+
+{% block script %}
+
+
+    <script type="text/javascript">
+        {% if task.id %}
+
+            function refreshStatus() {
+                $('#taskLogContainer').load("{% url 'mailator.views.task_logs' task.id %}");
+                $('#taskStatusContainer').load("{% url 'mailator.views.task_status' task.id %}");
+
+                {% if task.processing %}
+                    setTimeout('refreshStatus()', 3000);
+                {% endif %}
+            }
+
+            $(function() {
+                refreshStatus();
+            });
+        {% endif %}
+    </script>
+
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-xs-5">
+            <div class="well">
+                <form class="form-horizontal" method="POST" action="{% url 'mailator.views.edit_task' task.id %}"> {% csrf_token %}
+                    {% for field in task_form %}
+                        <div class="form-group">
+                            <label for="{{ field.auto_id }}" class="col-sm-3 control-label">{{ field.label }}</label>
+                            <div class="col-sm-9">
+                                {{ field }}
+                            </div>
+                        </div>
+                    {% endfor %}
+                    <div class="form-group" style="margin-bottom: -5px;">
+                        <div class="col-sm-12">
+                            <button type="submit" class="btn btn-primary pull-right">Save</button>
+                            {% if task.id %}
+                                <a style="margin-right: 10px;" href="{% url 'mailator.views.play_task' task.id %}" class="btn btn-success pull-right"><i class="fa fa-play"></i> Manual Launch</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-xs-7">
+            {% if task.id %}
+                <div id="taskStatusContainer">
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if task.id %}
+        <div id="taskLogContainer">
+        </div>
+    {% endif %}
+
+{% endblock %}

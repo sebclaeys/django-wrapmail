@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="{{request.LANGUAGE_CODE}}" class="no-js" >
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+    <title>{% block title %}Mailator{% endblock %}</title>
+
+    {% block meta %}
+    {% endblock %}
+
+
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.css" rel="stylesheet">
+    <link href='//fonts.googleapis.com/css?family=Black+Ops+One|Orbitron:400,700' rel='stylesheet' type='text/css'>
+    <link href="{{STATIC_URL}}/mailator/pub/css/vendors/bootstrap.css" rel="stylesheet">
+    <link href="{{STATIC_URL}}/mailator/pub/css/style.css" rel="stylesheet">
+
+
+    {% block head %} {% endblock %}
+
+</head>
+<body>
+
+
+<div id="globalContainer">
+
+    <div id="header">
+        <nav class="navbar navbar-inverse navbar-static-top" role="navigation">
+            <div class="clearfix">
+                <a id="toplogo" class="pull-left" href="{% url 'mailator.views.dashboard' %}">Mailator</a>
+                <div class="pull-left" style="margin-left: 20px;">
+                    <a href="{% url 'mailator.views.dashboard' %}">Dashboard</a> /
+{#                    <a href="{% url 'mailator.views.connections' %}">Connections</a> /#}
+{#                    <a href="{% url 'mailator.views.emails' %}">Emails</a> /#}
+{#                    <a href="{% url 'mailator.views.subscription' %}">Subscriptions</a> /#}
+{#                    <a href="{% url 'mailator.views.lists' %}">Lists</a> /#}
+                    <a href="{% url 'mailator.views.tasks' %}">Tasks</a> /
+                    <a href="{% url 'mailator.views.blacklist' %}">Blacklist</a>
+                </div>
+                <a id="topbutton" href="{% url 'mailator.views.edit_task' 0 %}" class="btn btn-primary pull-right">Schedule email</a>
+            </div>
+        </nav>
+    </div>
+
+    <div id="body">
+        {% block content-wrapper %}
+            <div class="container">
+                <div id="content">
+                    {% include "mailator/includes/messages.html" %}
+
+                    {% block content %} {% endblock %}
+                </div>
+            </div>
+        {% endblock %}
+    </div>
+
+
+    <div id="footer" class="clearfix">
+        <div class="container">
+            <footer class="clearfix">
+                <div class="text-center text-muted" id="copyright">
+{#                    <small>© Mailator 2097</small>#}
+                </div>
+            </footer>
+        </div>
+    </div>
+
+
+</div>
+
+{% block prescript %} {% endblock %}
+
+<script src="{{STATIC_URL}}/mailator/pub/js/vendors/jquery-1.11.1.min.js"></script>
+<script src="{{STATIC_URL}}/mailator/pub/js/vendors/bootstrap.js"></script>
+<script src="{{STATIC_URL}}/mailator/pub/js/vendors/jquery-ui-1.10.1.custom.min.js"></script>
+<script src="{{STATIC_URL}}/mailator/pub/js/vendors/jquery.form.js"></script>
+<script src="{{STATIC_URL}}/mailator/pub/js/helper.js"></script>
+
+{% block script %} {% endblock %}
+
+
+</body>
+</html>

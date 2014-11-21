@@ -1,0 +1,37 @@
+<div class="well">
+    <div class="clearfix">
+        <h3 class="pull-left">Tasks</h3>
+        <a class="pull-right green" href="{% url 'mailator.views.edit_task' 0 %}"><i class="fa fa-plus-square"></i> Add</a>
+    </div>
+    <table class="table table-hover">
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>Lang</th>
+            <th>Created</th>
+            <th>Liste</th>
+            <th>Email</th>
+            <th>Status</th>
+            <th>Progress</th>
+            <th class="text-right">Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for i in tasks %}
+            <tr>
+                <td>{{ i.name }}</td>
+                <td>{{ i.lang }}</td>
+                <td>{{ i.datetime }}</td>
+                <td>{{ i.liste }}</td>
+                <td>{{ i.email }}</td>
+                <td>{{ i.status }}</td>
+                <td>{{ i.nb_processed }} / {{ i.liste.nb_emails }} ({{ i.percent }}%)</td>
+                <td class="text-right">
+                    <a href="{% url 'mailator.views.edit_task' i.id %}">Edit</a> -
+                    <a href="{% url 'admin:mailator_task_delete' i.id %}">Delete</a>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>

@@ -1,0 +1,39 @@
+
+{% include "mailator/includes/messages.html" %}
+
+{% if template_form.errors %}
+    <div class="panel panel-danger">
+        {{ template_form.errors }}
+    </div>
+{% endif %}
+
+<form id="template{{ template.lang }}Form" method='POST' enctype="multipart/form-data" action="{% url 'mailator.views.save_template' email.id template.lang %}"> {% csrf_token %}
+
+    <div class="form-group">
+        <label for="{{ template_form.subject.auto_id }}" class="control-label">Object</label>
+        {{ template_form.subject }}
+    </div>
+    <div class="form-group">
+        <label for="{{ template_form.html_content.auto_id }}" class="control-label">Html content</label>
+        {{ template_form.html_content }}
+    </div>
+    <div class="form-group">
+        <label for="{{ template_form.attachment.auto_id }}" class="control-label">Attachment</label>
+        {{ template_form.attachment }}
+    </div>
+    <div class="form-group" style="margin-bottom: -5px;">
+        <div class="clearfix">
+            <button type="submit" class="btn btn-primary pull-right">Save</button>
+        </div>
+    </div>
+</form>
+
+
+{##}
+{#<script>#}
+{#    $('#template{{ template.lang }}Form').submit(function(event) {#}
+{#        event.preventDefault();#}
+{#        url = "{% url 'mailator.views.save_template' email.id template.lang %}";#}
+{#        postAjaxAndLoad(url, '#template{{ template.lang }}Form', '#template{{ template.lang }}');#}
+{#    });#}
+{#</script>#}

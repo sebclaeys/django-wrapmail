@@ -1,0 +1,34 @@
+{% extends "mailator/layouts/layout.html" %}
+
+{% block content %}
+    <div id="mailatorConnections">
+        <div class="row">
+            <div class="col-xs-6">
+                <div class="well">
+                    <div class="clearfix">
+                        <h3 class="pull-left">Connections</h3>
+                        <a class="pull-right green" href="{% url 'admin:mailator_connection_add' %}"><i class="fa fa-plus-square"></i> Add</a>
+                    </div>
+                    <table class="table table-hover">
+                        <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Host</th>
+                            <th class="text-right">Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for i in connections %}
+                            <tr>
+                                <td>{{ i.name }}</td>
+                                <td>{{ i.host }}</td>
+                                <td class="text-right"><a href="{% url 'admin:mailator_connection_change' i.id %}">Edit</a></td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

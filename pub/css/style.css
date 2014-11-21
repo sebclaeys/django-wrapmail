@@ -1,0 +1,27 @@
+body, html {
+  height: 100%; }
+
+h1, h2, h3, h4, h5 {
+  margin: 0;
+  padding: 0; }
+
+h3 {
+  margin-bottom: 10px; }
+
+#globalContainer {
+  height: 100%; }
+
+#header {
+  line-height: 50px;
+  color: white; }
+
+#toplogo {
+  font-size: 1.4em;
+  font-family: 'Orbitron';
+  margin-left: 20px; }
+  #toplogo:hover {
+    text-decoration: none; }
+
+#topbutton {
+  margin-top: 7px;
+  margin-right: 10px; }

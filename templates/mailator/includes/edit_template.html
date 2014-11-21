@@ -1,0 +1,33 @@
+<!-- Nav tabs -->
+<ul class="nav nav-tabs" role="tablist">
+    {% for template in templates %}
+        <li {% if template.is_active %}class="active"{% endif %}>
+            <a href="#{{ template.lang }}" role="tab" data-toggle="tab" onclick="previewTemplate('{% url 'mailator.views.preview_template' email.id template.id %}');">
+                {% if template.exists %}
+                    <i class="fa fa-check-square-o"></i>
+                {% else %}
+                    <i class="fa fa-square-o"></i>
+                {% endif %}
+                {{ template.lang }}
+            </a></li>
+    {% endfor %}
+</ul>
+
+<!-- Tab panes -->
+<div class="tab-content">
+    {% for template in templates %}
+        <div class="tab-pane {% if template.is_active %}active{% endif %}" id="{{ template.lang }}"  previewUrl="{% url 'mailator.views.preview_template' email.id template.id %}">
+            {% with template_form=template.form %}
+                <div id="template{{ template.lang }}" class="well">
+                    {% include "mailator/includes/template_form.html" %}
+                </div>
+            {% endwith %}
+        </div>
+    {% endfor %}
+</div>
+
+<script>
+    $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+        $('#templatePreviewContainer').load($(e.target).attr('previewUrl'));
+    })
+</script>
