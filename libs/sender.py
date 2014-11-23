@@ -3,16 +3,20 @@ import logging
 from django.utils import translation
 from django.template import Template, Context
 import mailator.libs.helper as helper
-
+from django.core.cache import cache
 import mailator.conf as conf
 
 log_info = logging.getLogger("mailator.info")
 log_error = logging.getLogger("mailator.error")
 
 from django.contrib.auth.models import User
-MEMBERS = set(map(lambda x: x.email, User.objects.all()))
 
-from multiprocessing import Pool
+def get_member_set(self):
+        member_set = cache.get('member_set_mailator', None)
+        if member_set is None:
+            member_set = set(map(lambda x: x.email, User.objects.all()))
+            cache.set('member_set_mailator', member_set)
+        return member_set
 
 def log_info(msg, callback=None):
     logger = logging.getLogger("mailator.info")
@@ -91,6 +95,8 @@ def send_to_recipients(recipients, email_name, context={}, lang=None, connection
     member_skiped = 0
     errors = 0
     opted_out = 0
+
+    MEMBERS = get_member_set()
 
     try:
         email_obj = model.Type.objects.get(name=email_name)
