@@ -1,3 +1,5 @@
+# coding=utf-8
+
 __author__ = 'sebastienclaeys'
 
 
@@ -180,7 +182,7 @@ def preview_template(request, eid, tid):
         subject = Template(template.subject).render(ctx)
     else:
         template = None
-    html_content = Template(layout.content % {'content': template.html_content.replace('{%', '[').replace('%}', ']') if template else '', 'optout_link': '[optout_link]'}).render(ctx)
+    html_content = Template(layout.content % {'content': template.html_content.replace('{%', '[').replace('%}', ']') if template else '', 'optout_link': '[optout_link]', 'spamreport_link': '[spamreport_link]'}).render(ctx)
     text_content = helper.html_to_text(html_content).replace('\n', '<br>')
     return render(request, 'mailator/includes/template_preview.html', locals())
 
@@ -317,5 +319,12 @@ def unsubscribe(request, cid, email):
     cid = int(cid)
     email = base64.b64decode(email)
     api.optout(email, cid)
-    messages.success(request, 'You have been unsubscribed successfully !')
+    messages.success(request, "L'action de désabonnement a été effectuée avec succès pour l'adresse %s." % email)
+    return render(request, 'mailator/pages/optout.html', {})
+
+def spamreport(request, email):
+#    cid = int(cid)
+    email = base64.b64decode(email)
+#    api.optout(email, cid)
+    messages.success(request, 'Votre action a été prise en compte.')
     return render(request, 'mailator/pages/optout.html', {})

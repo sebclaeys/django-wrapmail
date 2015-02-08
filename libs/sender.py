@@ -1,3 +1,5 @@
+# coding=utf-8
+
 from django.core.mail import get_connection, EmailMultiAlternatives
 import logging
 from django.utils import translation
@@ -11,7 +13,7 @@ log_error = logging.getLogger("mailator.error")
 
 from django.contrib.auth.models import User
 
-def get_member_set(self):
+def get_member_set():
         member_set = cache.get('member_set_mailator', None)
         if member_set is None:
             member_set = set(map(lambda x: x.email, User.objects.all()))
@@ -96,7 +98,7 @@ def send_to_recipients(recipients, email_name, context={}, lang=None, connection
     errors = 0
     opted_out = 0
 
-    MEMBERS = get_member_set()
+    MEMBERS = set()
 
     try:
         email_obj = model.Type.objects.get(name=email_name)
@@ -137,7 +139,8 @@ def send_to_recipients(recipients, email_name, context={}, lang=None, connection
             total += 1
 
             context.update(recipient.__dict__)
-            context.update({'user': recipient})
+	    import base64
+            context.update({'user': recipient, 'email_b64': base64.b64encode(recipient.email)})
 
 
             if not lang:
@@ -172,7 +175,7 @@ def send_to_recipients(recipients, email_name, context={}, lang=None, connection
             from_email = from_override if (from_override and len(from_override)) else email_obj.email_from
             from_email = from_email % context
 
-            html_content = Template(layout.content % {'content': tmpl.html_content, 'optout_link': email_obj.get_optout_link(recipient.email)}).render(ctx)
+            html_content = Template(layout.content % {'content': tmpl.html_content, 'optout_link': email_obj.get_optout_link(recipient.email), 'spamreport_link': email_obj.get_spamreport_link(recipient.email)}).render(ctx)
             text_content = helper.html_to_text(html_content)
 
             send_message(subject, html_content, text_content, [recipient.email], from_email=from_email, connection=connection, attachment=tmpl.attachment)

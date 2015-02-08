@@ -51,7 +51,12 @@ class Type(models.Model):
         else:
             link = reverse('mailator.views.unsubscribe', args=(self.category.id, base64.b64encode(email)))
 
-        return "%s <a href='%s/%s'>%s</a>" % (base, conf.SITE_BASE_URL, link, click)
+        return link
+
+    def get_spamreport_link(self, email):
+        link = reverse('mailator.views.spamreport', args=(base64.b64encode(email),))
+        return link
+
 
     # recipients = models.ManyToManyField(Recipient, through='TypeRecipient')
 
