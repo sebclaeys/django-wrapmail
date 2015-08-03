@@ -31,7 +31,16 @@ class Type(models.Model):
     category = models.ForeignKey(OptoutCategory, null=True, default=None)
     description = models.CharField(max_length=128, default="")
     email_from = models.CharField(max_length=64, default="")
+    reply_to = models.CharField(max_length=64, default="", blank=True)
     exclude_members = models.BooleanField(default=False)
+    use_bcc = models.BooleanField(default=False)
+
+    sent = models.IntegerField(default=0)
+    open = models.IntegerField(default=0)
+    click = models.IntegerField(default=0)
+    bounce = models.IntegerField(default=0)
+    spam = models.IntegerField(default=0)
+    unsub = models.IntegerField(default=0)
 
     def langs(self):
         return [x.lang for x in self.template_set.all()]
@@ -51,12 +60,7 @@ class Type(models.Model):
         else:
             link = reverse('mailator.views.unsubscribe', args=(self.category.id, base64.b64encode(email)))
 
-        return link
-
-    def get_spamreport_link(self, email):
-        link = reverse('mailator.views.spamreport', args=(base64.b64encode(email),))
-        return link
-
+        return "%s <a href='%s/%s'>%s</a>" % (base, conf.SITE_BASE_URL, link, click)
 
     # recipients = models.ManyToManyField(Recipient, through='TypeRecipient')
 
@@ -74,9 +78,12 @@ class Type(models.Model):
 class Template(models.Model):
     email_type = models.ForeignKey(Type)
     lang = models.CharField(max_length=4)
-    subject = models.CharField(max_length=128, blank=True)
+    subject = models.CharField(max_length=1024, blank=True)
     html_content = models.TextField(blank=True)
     attachment = models.FileField(upload_to="pub/doc", null=True, blank=True, default=None)
+
+    # Ugly fix. no time to make a onetomany relationship. Todo: do it eventually
+    attachment_2 = models.FileField(upload_to="pub/doc", null=True, blank=True, default=None)
 
     def __unicode__(self):
         return "%s - %s" % (self.email_type.name, self.lang)

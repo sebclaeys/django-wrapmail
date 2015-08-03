@@ -16,3 +16,9 @@ MANDRILL_EVENT_MAP = {'hard_bounce': 'bounce',
                       'unsub': 'unsub',
                       'open': 'open'
 }
+
+
+# Send email tasks to django celery
+# Should be on only for Production settings
+MAILATOR_TEST_MODE = getattr(settings, 'MAILATOR_ASYNC', False)
+MAILATOR_TEST_ADDRESS = getattr(settings, 'MAILATOR_ASYNC', "sebastien@trampolinn.com")

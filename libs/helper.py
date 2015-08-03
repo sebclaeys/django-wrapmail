@@ -1,10 +1,13 @@
 __author__ = 'sebastienclaeys'
 
 class DummyRecipient(object):
-    def __init__(self, email, fields={}):
+    def __init__(self, email, fields=None):
         self.email = email
-        for key, val in fields.iteritems():
-            self.__dict__[key] = val
+        self.first_name = None
+        self.last_name = None
+        if fields:
+            for key, val in fields.iteritems():
+                self.__dict__[key] = val
 
 
 

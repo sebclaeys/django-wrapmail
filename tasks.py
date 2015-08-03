@@ -6,7 +6,7 @@ import mailator.models as model
 import mailator.conf as conf
 
 @task
-def send_to_recipients(recipients, email_name, context={}, lang=None, connection_override=None, from_override=None):
+def send_to_recipients(recipients, email_name, context=None, lang=None, connection_override=None, from_override=None):
     sender.send_to_recipients(recipients, email_name, context=context, lang=lang, connection_override=connection_override, from_override=from_override)
 
 

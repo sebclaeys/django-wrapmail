@@ -1,24 +1,25 @@
-# coding=utf-8
-
 from django.core.mail import get_connection, EmailMultiAlternatives
 import logging
 from django.utils import translation
 from django.template import Template, Context
 import mailator.libs.helper as helper
-from django.core.cache import cache
+import simplejson
+try:
+    from data_tracker import api as dt_api
+except:
+    from datatracker import api as dt_api
+
+from mailator.models.event import EmailEvent
+
 import mailator.conf as conf
 
 log_info = logging.getLogger("mailator.info")
 log_error = logging.getLogger("mailator.error")
 
 from django.contrib.auth.models import User
+MEMBERS = set(map(lambda x: x.email, User.objects.all()))
 
-def get_member_set():
-        member_set = cache.get('member_set_mailator', None)
-        if member_set is None:
-            member_set = set(map(lambda x: x.email, User.objects.all()))
-            cache.set('member_set_mailator', member_set)
-        return member_set
+from multiprocessing import Pool
 
 def log_info(msg, callback=None):
     logger = logging.getLogger("mailator.info")
@@ -43,11 +44,29 @@ def set_lang(lang):
 
 import os
 
-def send_message(subject, html_content, text_content, to, from_email=None, connection=None, attachment=None):
-    msg = EmailMultiAlternatives(subject, text_content, from_email, to, connection=connection)
+def send_message(subject, html_content, text_content, to, from_email=None, reply_to=None, connection=None, attachments=None, usebcc=None, email_name=None):
+    bcc=None
+
+    if usebcc:
+        bcc=to
+        to=None
+
+    headers = {"X-SMTPAPI": simplejson.dumps({'unique_args':
+                   {'email_name': email_name}})
+                }
+
+
+    if reply_to and len(reply_to) > 0:
+        headers.update({'Reply-To': reply_to})
+
+
+    msg = EmailMultiAlternatives(subject=subject, body=text_content, from_email=from_email, to=to, bcc=bcc, connection=connection, headers=headers)
     msg.attach_alternative(html_content, "text/html")
-    if attachment and os.path.exists(attachment.path):
-        msg.attach_file(attachment.path)
+
+    for attachment in attachments:
+        if attachment and os.path.exists(attachment.path):
+            msg.attach_file(attachment.path)
+
     msg.send()
     import django.core.mail.message
 
@@ -55,14 +74,14 @@ def send_to_list(liste, email_name, context={}, lang=None):
     return send_to_recipients(liste.build_recipient_list(), email_name, context, lang)
 
 
-def multiprocess_send_to_recipients(recipients, email_name, context={}, lang=None, connection_override=None, log_call=print_logger, from_override=None, processes=1):
+def multiprocess_send_to_recipients(recipients, email_name, context={}, lang=None, connection_override=None, log_call=print_logger, from_override=None, processes=1, usebcc=None):
     if processes == 1:
         # Use the regular function if we have only one process
-        return send_to_recipients(recipients, email_name, context=context, lang=lang, connection_override=connection_override, log_call=log_call, from_override=from_override)
+        return send_to_recipients(recipients, email_name, context=context, lang=lang, connection_override=connection_override, log_call=log_call, from_override=from_override, usebcc=usebcc)
 
     # Create a wrapper that contains all sub parameters and takes only the chunk of recipient
     def wrapper(recipients_chunk):
-        return send_to_recipients(recipients_chunk , email_name, context=context, lang=lang, connection_override=connection_override, log_call=log_call, from_override=from_override)
+        return send_to_recipients(recipients_chunk , email_name, context=context, lang=lang, connection_override=connection_override, log_call=log_call, from_override=from_override, usebcc=usebcc)
 
 
     from multiprocessing.pool import ThreadPool
@@ -85,8 +104,16 @@ def multiprocess_send_to_recipients(recipients, email_name, context={}, lang=Non
     return (total_members, count, blacklisted, member_skiped, errors)
 
 
-def send_to_recipients(recipients, email_name, context={}, lang=None, connection_override=None, log_call=print_logger, from_override=None):
+def send_to_recipients(recipients, email_name, context=None, lang=None, connection_override=None, log_call=print_logger, from_override=None, usebcc=None):
     import mailator.models as model
+
+    # Bug fix
+    can_update_user = True
+    if context == None:
+        context = {}
+    if 'user' in context:
+        can_update_user = False
+
     connection = None
     count = 0
     total = 0
@@ -97,8 +124,7 @@ def send_to_recipients(recipients, email_name, context={}, lang=None, connection
     member_skiped = 0
     errors = 0
     opted_out = 0
-
-    MEMBERS = set()
+    lang_override=lang
 
     try:
         email_obj = model.Type.objects.get(name=email_name)
@@ -139,9 +165,11 @@ def send_to_recipients(recipients, email_name, context={}, lang=None, connection
             total += 1
 
             context.update(recipient.__dict__)
-	    import base64
-            context.update({'user': recipient, 'email_b64': base64.b64encode(recipient.email)})
+            if can_update_user:
+                context.update({'user': recipient})
 
+
+            lang = lang_override
 
             if not lang:
                 try:
@@ -152,9 +180,9 @@ def send_to_recipients(recipients, email_name, context={}, lang=None, connection
                 except:
                     lang = 'en'
 
-            # Lang context override
-            if 'lang' in context:
-                lang = context['lang']
+                # Lang context override
+                if 'lang' in context:
+                    lang = context['lang']
 
             set_lang(lang)
 
@@ -175,12 +203,20 @@ def send_to_recipients(recipients, email_name, context={}, lang=None, connection
             from_email = from_override if (from_override and len(from_override)) else email_obj.email_from
             from_email = from_email % context
 
-            html_content = Template(layout.content % {'content': tmpl.html_content, 'optout_link': email_obj.get_optout_link(recipient.email), 'spamreport_link': email_obj.get_spamreport_link(recipient.email)}).render(ctx)
+            html_content = Template(layout.content % {'content': tmpl.html_content, 'optout_link': email_obj.get_optout_link(recipient.email)}).render(ctx)
             text_content = helper.html_to_text(html_content)
 
-            send_message(subject, html_content, text_content, [recipient.email], from_email=from_email, connection=connection, attachment=tmpl.attachment)
+            send_to_address = recipient.email
+            if recipient.first_name:
+                send_to_address = "%s %s <%s>" % (recipient.first_name, recipient.last_name if recipient.last_name else '', recipient.email)
 
+            send_message(subject, html_content, text_content, [send_to_address], email_name=email_name, from_email=from_email, reply_to=email_obj.reply_to, connection=connection, attachments=[tmpl.attachment, tmpl.attachment_2], usebcc=email_obj.use_bcc if not usebcc else usebcc)
+
+            # Increment the number of email sent
+            EmailEvent.objects.add_event('sent', email_name=email_name, recipient=send_to_address)
             count += 1
+
+            dt_api.track(None, name="Email sent", properties={'name': email_name, 'recipient': recipient.email}, group="Emails")
 
         except Exception, e:
             import traceback
@@ -189,10 +225,10 @@ def send_to_recipients(recipients, email_name, context={}, lang=None, connection
             errors += 1
             connection = None
 
+
     log_info("Email sent to %d out of %d members. %d blacklisted, %d member skipped, %d errors" % (count, total_members, blacklisted, member_skiped, errors), callback=log_call)
     if connection:
         connection.close()
 
 
     return (total_members, count, blacklisted, member_skiped, errors)
-

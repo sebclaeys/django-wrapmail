@@ -26,6 +26,7 @@ def optinout(email, cid, is_optout=True):
     optout_cat.optout = is_optout
     optout_cat.save()
 
+
 # Shortcuts
 def optin(email, cid):
     optinout(email, cid, False)
@@ -67,6 +68,9 @@ def render_email(email_name, context=None, lang=None, tid=None):
 
     return html_content, text_content
 
+
+def save_sendgrid_events(events):
+    model.EmailEvent.objects.add_sendgrid_event(events)
 
 # Save an event
 def save_events(events):

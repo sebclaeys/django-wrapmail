@@ -5,12 +5,12 @@ class EmailTypeForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(EmailTypeForm, self).__init__(*args, **kwargs)
         for f in self.fields:
-            if f != 'exclude_members':
+            if f != 'exclude_members' and f != 'use_bcc':
                 self.fields[f].widget.attrs = {'class': 'form-control'}
 
     class Meta:
         model = model.Type
-        fields = ('name', 'description', 'email_from', 'layout', 'category', 'connection', 'exclude_members')
+        fields = ('name', 'description', 'email_from', 'reply_to', 'layout', 'category', 'connection', 'use_bcc', 'exclude_members')
 
 
 class TemplateForm(forms.ModelForm):
@@ -21,7 +21,7 @@ class TemplateForm(forms.ModelForm):
 
     class Meta:
         model = model.Template
-        fields = ('subject', 'html_content', 'attachment')
+        fields = ('subject', 'html_content', 'attachment', 'attachment_2')
 
 
 class EmailListForm(forms.ModelForm):

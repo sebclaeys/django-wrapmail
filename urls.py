@@ -2,6 +2,9 @@ __author__ = 'sebastienclaeys'
 
 from django.conf.urls import url, patterns
 
+
+
+
 urlpatterns = patterns('mailator.views',
     (r'^$', 'dashboard'),
     # (r'^connections$', 'connection'),
@@ -24,7 +27,6 @@ urlpatterns = patterns('mailator.views',
     (r'^task_status/(\d+)$', 'task_status'),
     (r'^play_task/(\d+)$', 'play_task'),
     (r'^unsubscribe/(\d+)/([0-9a-zA-Z_=-]+)$', 'unsubscribe'),
-    (r'^spamreport/([0-9a-zA-Z_=-]+)$', 'spamreport'),
     (r'^mandrill_events/$', 'mandrill_events'),
     (r'^blacklist/$', 'blacklist'),
     (r'^upload_blacklist/$', 'upload_blacklist'),
