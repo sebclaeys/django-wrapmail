@@ -4,6 +4,7 @@ from django.utils import translation
 from django.template import Template, Context
 import mailator.libs.helper as helper
 import simplejson
+
 try:
     from data_tracker import api as dt_api
 except:
@@ -17,7 +18,7 @@ log_info = logging.getLogger("mailator.info")
 log_error = logging.getLogger("mailator.error")
 
 from django.contrib.auth.models import User
-MEMBERS = set(map(lambda x: x.email, User.objects.all()))
+#MEMBERS = set(map(lambda x: x.email, User.objects.all()))
 
 from multiprocessing import Pool
 
